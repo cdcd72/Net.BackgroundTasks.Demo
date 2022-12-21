@@ -10,7 +10,7 @@ builder.Services.AddSwaggerGen();
 // Add background queue
 builder.Services.AddSingleton<IBackgroundTaskQueue>(_ =>
 {
-    if (!int.TryParse(builder.Configuration["Background:QueueCapacity"], out var queueCapacity)) queueCapacity = 100;
+    if (!int.TryParse(builder.Configuration["BackgroundTask:QueueCapacity"], out var queueCapacity)) queueCapacity = 100;
     return new BackgroundTaskQueue(queueCapacity);
 });
 // Add background queue worker
