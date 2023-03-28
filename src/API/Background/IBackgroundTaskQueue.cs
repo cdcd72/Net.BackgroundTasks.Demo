@@ -2,7 +2,9 @@
 
 public interface IBackgroundTaskQueue
 {
-    int QueueCount { get; }
+    string Name { get; }
+    
+    int QueuedCount { get; }
 
     ValueTask EnqueueAsync(Func<CancellationToken, ValueTask> workItem);
 

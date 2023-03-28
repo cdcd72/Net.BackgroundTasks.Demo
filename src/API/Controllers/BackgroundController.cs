@@ -10,15 +10,15 @@ public class BackgroundController : ControllerBase
     private readonly ILogger<BackgroundController> _logger;
     private readonly IBackgroundTaskQueue _taskQueue;
 
-    public BackgroundController(ILogger<BackgroundController> logger, IBackgroundTaskQueue taskQueue)
+    public BackgroundController(ILogger<BackgroundController> logger, IEnumerable<IBackgroundTaskQueue> taskQueues)
     {
         _logger = logger;
-        _taskQueue = taskQueue;
+        _taskQueue = taskQueues.First(queue => queue.Name == "Demo");
     }
     
     [HttpGet]
     [Route(nameof(GetQueueCount))]
-    public int GetQueueCount() => _taskQueue.QueueCount;
+    public int GetQueueCount() => _taskQueue.QueuedCount;
 
     [HttpPost]
     [Route(nameof(Enqueue))]

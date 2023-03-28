@@ -1,4 +1,5 @@
 ﻿using System.Threading.Channels;
+using API.Background.Models;
 
 namespace API.Background;
 
@@ -8,20 +9,19 @@ public class BackgroundTaskQueue : IBackgroundTaskQueue
 
     #region Properties
 
-    public int QueueCount => _queue.Reader.Count;
+    public string Name { get; }
+
+    public int QueuedCount => _queue.Reader.Count;
 
     #endregion
 
-    public BackgroundTaskQueue(int capacity)
+    public BackgroundTaskQueue(BackgroundTaskQueueOptions backgroundTaskQueueOptions)
     {
-        // Capacity should be set based on the expected application load and
-        // number of concurrent threads accessing the queue.            
-        // BoundedChannelFullMode.Wait will cause calls to WriteAsync() to return a task,
-        // which completes only when space became available. This leads to backpressure,
-        // in case too many publishers/calls start accumulating.
-        _queue = Channel.CreateBounded<Func<CancellationToken, ValueTask>>(new BoundedChannelOptions(capacity)
+        Name = backgroundTaskQueueOptions.Name;
+        
+        _queue = Channel.CreateBounded<Func<CancellationToken, ValueTask>>(new BoundedChannelOptions(backgroundTaskQueueOptions.Capacity)
         {
-            FullMode = BoundedChannelFullMode.Wait
+            FullMode = backgroundTaskQueueOptions.FullMode
         });
     }
 
