@@ -1,4 +1,5 @@
 using API.Background;
+using API.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -13,7 +14,7 @@ public class BackgroundController : ControllerBase
     public BackgroundController(ILogger<BackgroundController> logger, IEnumerable<IBackgroundTaskQueue> taskQueues)
     {
         _logger = logger;
-        _taskQueue = taskQueues.First(queue => queue.Name == "Demo");
+        _taskQueue = taskQueues.GetBackgroundTaskQueue("Demo");
     }
     
     [HttpGet]

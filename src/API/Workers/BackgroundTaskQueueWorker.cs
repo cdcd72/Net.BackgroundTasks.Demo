@@ -1,4 +1,5 @@
 ﻿using API.Background;
+using API.Extensions;
 
 namespace API.Workers;
 
@@ -7,10 +8,10 @@ public class BackgroundTaskQueueWorker : BackgroundService
     private readonly ILogger<BackgroundTaskQueueWorker> _logger;
     private readonly IBackgroundTaskQueue _taskQueue;
 
-    public BackgroundTaskQueueWorker(ILogger<BackgroundTaskQueueWorker> logger, IBackgroundTaskQueue taskQueue)
+    public BackgroundTaskQueueWorker(ILogger<BackgroundTaskQueueWorker> logger, IEnumerable<IBackgroundTaskQueue> taskQueues)
     {
         _logger = logger;
-        _taskQueue = taskQueue;
+        _taskQueue = taskQueues.GetBackgroundTaskQueue("Demo");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
