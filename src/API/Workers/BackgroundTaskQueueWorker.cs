@@ -3,20 +3,13 @@ using API.Extensions;
 
 namespace API.Workers;
 
-public class BackgroundTaskQueueWorker : BackgroundService
+public class BackgroundTaskQueueWorker(ILogger<BackgroundTaskQueueWorker> logger, IEnumerable<IBackgroundTaskQueue> taskQueues) : BackgroundService
 {
-    private readonly ILogger<BackgroundTaskQueueWorker> _logger;
-    private readonly IBackgroundTaskQueue _taskQueue;
-
-    public BackgroundTaskQueueWorker(ILogger<BackgroundTaskQueueWorker> logger, IEnumerable<IBackgroundTaskQueue> taskQueues)
-    {
-        _logger = logger;
-        _taskQueue = taskQueues.GetBackgroundTaskQueue("Demo");
-    }
+    private readonly IBackgroundTaskQueue _taskQueue = taskQueues.GetBackgroundTaskQueue("Demo");
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Background Queue Worker is running.");
+        logger.LogInformation("Background Queue Worker is running.");
 
         await BackgroundProcessing(stoppingToken);
     }
@@ -33,14 +26,14 @@ public class BackgroundTaskQueueWorker : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred executing {WorkItem}.", nameof(workItem));
+                logger.LogError(ex, "Error occurred executing {WorkItem}.", nameof(workItem));
             }
         }
     }
 
     public override async Task StopAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Background Queue Worker is stopping.");
+        logger.LogInformation("Background Queue Worker is stopping.");
 
         await base.StopAsync(stoppingToken);
     }

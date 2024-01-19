@@ -6,17 +6,11 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class BackgroundController : ControllerBase
+public class BackgroundController(ILogger<BackgroundController> logger, IEnumerable<IBackgroundTaskQueue> taskQueues)
+    : ControllerBase
 {
-    private readonly ILogger<BackgroundController> _logger;
-    private readonly IBackgroundTaskQueue _taskQueue;
+    private readonly IBackgroundTaskQueue _taskQueue = taskQueues.GetBackgroundTaskQueue("Demo");
 
-    public BackgroundController(ILogger<BackgroundController> logger, IEnumerable<IBackgroundTaskQueue> taskQueues)
-    {
-        _logger = logger;
-        _taskQueue = taskQueues.GetBackgroundTaskQueue("Demo");
-    }
-    
     [HttpGet]
     [Route(nameof(GetQueueCount))]
     public int GetQueueCount() => _taskQueue.QueuedCount;
@@ -41,11 +35,11 @@ public class BackgroundController : ControllerBase
         
         var guid = $"{Guid.NewGuid()}";
 
-        _logger.LogInformation("Queued Background Task {Guid} is starting.", guid);
+        logger.LogInformation("Queued Background Task {Guid} is starting.", guid);
 
         try
         {
-            _logger.LogInformation("Queued Background Task {Guid} is running with value {Value}.", guid, value);
+            logger.LogInformation("Queued Background Task {Guid} is running with value {Value}.", guid, value);
                 
             await Task.Delay(TimeSpan.FromSeconds(5), token);
         }
@@ -54,7 +48,7 @@ public class BackgroundController : ControllerBase
             // Prevent throwing if the Delay is cancelled
         }
 
-        _logger.LogInformation("Queued Background Task {Guid} is complete.", guid);
+        logger.LogInformation("Queued Background Task {Guid} is complete.", guid);
     }
 
     #endregion

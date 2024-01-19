@@ -3,32 +3,25 @@ using API.Background.Models;
 
 namespace API.Background;
 
-public class BackgroundTaskQueue : IBackgroundTaskQueue
+public class BackgroundTaskQueue(BackgroundTaskQueueOptions backgroundTaskQueueOptions) : IBackgroundTaskQueue
 {
-    private readonly Channel<Func<CancellationToken, ValueTask>> _queue;
+    private readonly Channel<Func<CancellationToken, ValueTask>> _queue = 
+        Channel.CreateBounded<Func<CancellationToken, ValueTask>>(new BoundedChannelOptions(backgroundTaskQueueOptions.Capacity)
+        {
+            FullMode = backgroundTaskQueueOptions.FullMode
+        });
 
     #region Properties
 
-    public string Name { get; }
+    public string Name { get; } = backgroundTaskQueueOptions.Name;
 
     public int QueuedCount => _queue.Reader.Count;
 
     #endregion
 
-    public BackgroundTaskQueue(BackgroundTaskQueueOptions backgroundTaskQueueOptions)
-    {
-        Name = backgroundTaskQueueOptions.Name;
-        
-        _queue = Channel.CreateBounded<Func<CancellationToken, ValueTask>>(new BoundedChannelOptions(backgroundTaskQueueOptions.Capacity)
-        {
-            FullMode = backgroundTaskQueueOptions.FullMode
-        });
-    }
-
     public async ValueTask EnqueueAsync(Func<CancellationToken, ValueTask> workItem)
     {
-        if (workItem is null)
-            throw new ArgumentNullException(nameof(workItem));
+        ArgumentNullException.ThrowIfNull(workItem);
 
         await _queue.Writer.WriteAsync(workItem);
     }
